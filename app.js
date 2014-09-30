@@ -16,6 +16,8 @@ var dates = [
 var developers = {};
 
 var completed = 0;
+
+console.log('Performing API calls...');
 _.each(dates, function (date) {
 	url = 'https://' + host + '/rest/api/latest/search?jql=status was "In Progress" DURING ("' + date + ' 00:00", "' + date +' 23:59") and (project = "BLN API" or project = "BLN Web")';
 	
@@ -40,6 +42,9 @@ _.each(dates, function (date) {
 			
 			// if all API calls completed
 			if (completed == dates.length) {
+				console.log('API calls completed.');
+				console.log('');
+				
 				// calculate hours
 				_.each(developers, function (developer, name) {
 					_.each(developer, function (date) {
