@@ -5,6 +5,8 @@ var url;
 var host = process.env.JIRA_HOST;
 var username = process.env.JIRA_USERNAME;
 var password = process.env.JIRA_PASSWORD;
+var filter = process.env.JIRA_FILTER;
+var statuses = process.env.JIRA_STATUSES;
 
 var dates = [
 	'2014/09/22',
@@ -19,7 +21,7 @@ var completed = 0;
 
 console.log('Performing API calls...');
 _.each(dates, function (date) {
-	url = 'https://' + host + '/rest/api/latest/search?jql=status was in ("In Progress", "In Dev Review") DURING ("' + date + ' 00:00", "' + date +' 23:59") and (project = "BLN API" or project = "BLN Web")';
+	url = 'https://' + host + '/rest/api/latest/search?maxResults=100&jql=status was in (' + statuses + ') DURING ("' + date + ' 00:00", "' + date +' 23:59") and (' + filter + ')';
 	
 	var request = require('request');
 	request.get({url: url, json: true}, function (error, response, body) {
