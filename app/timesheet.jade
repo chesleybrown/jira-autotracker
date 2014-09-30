@@ -1,0 +1,32 @@
+style.
+	h1 {
+		text-align: center;
+	}
+	body {
+		padding: 50px;
+		font: 16px "Helvetica Neue", Helvetica;
+	}
+	table {
+		width: 100%;
+	}
+	table th {
+		text-align: left;
+	}
+
+h1 Jira Autotracker
+
+table
+	each developer, name in developers
+		tr
+			th
+			th Issues
+			each date in dates
+				th= date
+		tr
+			th= name
+		each issue, issueKey in developer
+			tr
+				td
+				td= issueKey
+				each hours, date in issue
+					td #{hours} hours

@@ -11,8 +11,11 @@
 		"url": "git://github.com/chesleybrown/jira-autotracker.git"
 	},
 	"dependencies": {
+		"express": "4.9.5",
 		"request": "2.44.0",
-		"lodash": "2.4.1"
+		"lodash": "2.4.1",
+		"q": "1.0.1",
+		"jade": "1.7.0"
 	},
 	"devDependencies": {
 		"grunt": "0.4.5",

@@ -13,9 +13,11 @@ module.exports = function(grunt) {
 			}
 		},
 		exec: {
-			run: 'node app.js'
+			server: 'node app/server.js',
+			run: 'node app/cli.js'
 		}
 	});
 	
 	grunt.registerTask('default', ['env', 'exec:run']);
+	grunt.registerTask('server', ['env', 'exec:server']);
 };
