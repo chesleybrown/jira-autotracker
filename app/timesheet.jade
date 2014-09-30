@@ -26,12 +26,25 @@ style.
 		font-size: 12px;
 		border-bottom: 1px solid #999;
 	}
-	table td span {
+	table td span.summary {
 		font-size: 10px;
+	}
+	.controls {
+		margin-top: 10px;
+		text-align: center;
+	}
+	.controls a,
+	.controls span {
+		padding: 0 10px;
 	}
 
 nav
 	h1 Jira Autotracker
+
+div.controls
+	a(href='?date=' + previousWeek) &lsaquo; Previous Week
+	span= currentWeek
+	a(href='?date=' + nextWeek) Next Week &rsaquo;
 
 table
 	each developer, name in developers
@@ -44,6 +57,10 @@ table
 		each issue, issueKey in developer
 			tr
 				td #{issueKey} 
-					span= issue.issue.fields.summary
-				each hours in issue.date
-					td #{hours} hours
+					span.summary= issue.issue.fields.summary
+				each hours in issue.dates
+					td
+						if hours
+							span #{hours} hours
+						else
+							span -

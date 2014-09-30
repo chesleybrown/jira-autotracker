@@ -2,6 +2,7 @@
 
 var _ = require('lodash');
 var q = require('q');
+var moment = require('moment');
 var url;
 var host = process.env.JIRA_HOST;
 var username = process.env.JIRA_USERNAME;
@@ -10,27 +11,22 @@ var filter = process.env.JIRA_FILTER;
 var statuses = process.env.JIRA_STATUSES;
 
 var Jira = module.exports = function () {
-	var dates = [
-		'2014/09/22',
-		'2014/09/23',
-		'2014/09/24',
-		'2014/09/25',
-		'2014/09/26'
-	];
-	var developers = {};
-	
-	var completed = 0;
+	var dates;
 	
 	this.setDates = function (d) {
 		dates = d;
+		return this;
 	};
 	
 	this.get = function () {
+		var currentDate = new Date();
+		var completed = 0;
 		var deferred = q.defer();
+		var developers = {};
 		
 		console.log('Performing API calls...');
 		_.each(dates, function (date) {
-			url = 'https://' + host + '/rest/api/latest/search?maxResults=100&jql=status was in (' + statuses + ') DURING ("' + date + ' 00:00", "' + date +' 23:59") and (' + filter + ')';
+			url = 'https://' + host + '/rest/api/latest/search?maxResults=100&jql=status was in (' + statuses + ') DURING ("' + date + ' 00:00", "' + date +' 23:59") and (' + filter + ') and assignee is not EMPTY';
 			
 			var request = require('request');
 			request.get({url: url, json: true}, function (error, response, body) {
@@ -62,26 +58,25 @@ var Jira = module.exports = function () {
 						
 						// calculate hours
 						_.each(developers, function (developer, name) {
-							_.each(developer, function (date) {
+							_.each(developer, function (logs) {
 								var totalHours = 0;
 								
-								_.each(date, function (info, key) {
-									var hours = 8/date.length;
+								_.each(logs, function (log, key) {
+									var hours = 8/logs.length;
 									var roundedHours = 0;
 									
-									if (key+1 == date.length) {
+									if (key+1 == logs.length) {
 										roundedHours = 8 - totalHours;
 									}
 									else {
-										roundedHours = (250 * Math.round(hours*1000/250))/1000;
+										roundedHours = Math.round(hours*4)/4;
 									}
-									if (roundedHours < 0) {
+									if (roundedHours <= 0) {
 										roundedHours = 0;
 									}
 									totalHours = totalHours + roundedHours;
 									
-									info.hours = roundedHours;
-									
+									log.hours = roundedHours;
 								});
 							});
 						});
@@ -89,10 +84,10 @@ var Jira = module.exports = function () {
 						// display results
 						_.each(developers, function (developer, name) {
 							console.log(name);
-							_.each(developer, function (date, key) {
-								console.log('- ' + key);
-								_.each(date, function (info) {
-									console.log('-- ' + info.issue.key + ' ' + info.issue.fields.summary + ': ' + info.hours + ' hours');
+							_.each(developer, function (logs, date) {
+								console.log('- ' + date);
+								_.each(logs, function (log) {
+									console.log('-- ' + log.issue.key + ' ' + log.issue.fields.summary + ': ' + log.hours + ' hours');
 								});
 							});
 							console.log('')
@@ -103,18 +98,20 @@ var Jira = module.exports = function () {
 						_.each(developers, function (developer, name) {
 							developersTable[name] = {};
 							
-							_.each(developer, function (date, key) {
-								_.each(date, function (info) {
-									if (!developersTable[name][info.issue.key]) {
-										developersTable[name][info.issue.key] = {
-											issue: info.issue,
-											date: {}
+							_.each(developer, function (logs, date) {
+								_.each(logs, function (log) {
+									if (!developersTable[name][log.issue.key]) {
+										developersTable[name][log.issue.key] = {
+											issue: log.issue,
+											dates: {}
 										};
+										_.each(dates, function (date) {
+											developersTable[name][log.issue.key].dates[date] = 0;
+										});
 									}
-									if (!developersTable[name][info.issue.key].date[key]) {
-										developersTable[name][info.issue.key].date[key] = 0;
+									if (moment(date, 'YYYY/MM/DD').valueOf() <= currentDate.getTime()) {
+										developersTable[name][log.issue.key].dates[date] = log.hours;
 									}
-									developersTable[name][info.issue.key].date[key] = developersTable[name][info.issue.key].date[key] + info.hours;
 								});
 							});
 						});
