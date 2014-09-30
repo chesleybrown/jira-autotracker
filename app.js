@@ -19,11 +19,14 @@ var completed = 0;
 
 console.log('Performing API calls...');
 _.each(dates, function (date) {
-	url = 'https://' + host + '/rest/api/latest/search?jql=status was "In Progress" DURING ("' + date + ' 00:00", "' + date +' 23:59") and (project = "BLN API" or project = "BLN Web")';
+	url = 'https://' + host + '/rest/api/latest/search?jql=status was in ("In Progress", "In Dev Review") DURING ("' + date + ' 00:00", "' + date +' 23:59") and (project = "BLN API" or project = "BLN Web")';
 	
 	var request = require('request');
 	request.get({url: url, json: true}, function (error, response, body) {
-		if (!error && response.statusCode == 200) {
+		if (error) {
+			console.log(error);
+		}
+		else if (response.statusCode == 200) {
 			_.each(body.issues, function (issue) {
 				// group by assignee
 				if (!developers[issue.fields.assignee.name]) {
@@ -58,7 +61,10 @@ _.each(dates, function (date) {
 								roundedHours = 8 - totalHours;
 							}
 							else {
-								roundedHours = (5 * Math.round(hours*10/5))/10;
+								roundedHours = (250 * Math.round(hours*1000/250))/1000;
+							}
+							if (roundedHours < 0) {
+								roundedHours = 0;
 							}
 							totalHours = totalHours + roundedHours;
 							
