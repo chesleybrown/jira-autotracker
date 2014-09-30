@@ -1,32 +1,49 @@
 style.
-	h1 {
-		text-align: center;
-	}
 	body {
-		padding: 50px;
+		margin: 0;
 		font: 16px "Helvetica Neue", Helvetica;
 	}
+	nav {
+		border-bottom: 1px solid #2e3d54;
+		margin-top: 0;
+		background: #205081;
+	}
+	nav h1 {
+		font-weight: normal;
+		color: #fff;
+		margin: 0;
+		padding: 5px 10px;
+	}
 	table {
+		padding: 50px;
 		width: 100%;
 	}
 	table th {
+		margin-top: 10px;
 		text-align: left;
 	}
+	table td {
+		font-size: 12px;
+		border-bottom: 1px solid #999;
+	}
+	table td span {
+		font-size: 10px;
+	}
 
-h1 Jira Autotracker
+nav
+	h1 Jira Autotracker
 
 table
 	each developer, name in developers
 		tr
 			th
-			th Issues
 			each date in dates
 				th= date
 		tr
 			th= name
 		each issue, issueKey in developer
 			tr
-				td
-				td= issueKey
-				each hours, date in issue
+				td #{issueKey} 
+					span= issue.issue.fields.summary
+				each hours in issue.date
 					td #{hours} hours

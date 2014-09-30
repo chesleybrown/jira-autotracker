@@ -106,12 +106,15 @@ var Jira = module.exports = function () {
 							_.each(developer, function (date, key) {
 								_.each(date, function (info) {
 									if (!developersTable[name][info.issue.key]) {
-										developersTable[name][info.issue.key] = {};
+										developersTable[name][info.issue.key] = {
+											issue: info.issue,
+											date: {}
+										};
 									}
-									if (!developersTable[name][info.issue.key][key]) {
-										developersTable[name][info.issue.key][key] = 0;
+									if (!developersTable[name][info.issue.key].date[key]) {
+										developersTable[name][info.issue.key].date[key] = 0;
 									}
-									developersTable[name][info.issue.key][key] = developersTable[name][info.issue.key][key] + info.hours;
+									developersTable[name][info.issue.key].date[key] = developersTable[name][info.issue.key].date[key] + info.hours;
 								});
 							});
 						});
