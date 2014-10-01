@@ -23,6 +23,7 @@ var Jira = module.exports = function () {
 		var completed = 0;
 		var deferred = q.defer();
 		var developers = {};
+		var weights = {};
 		
 		console.log('Performing API calls...');
 		_.each(dates, function (date) {
@@ -38,15 +39,39 @@ var Jira = module.exports = function () {
 					_.each(body.issues, function (issue) {
 						// group by assignee
 						if (!developers[issue.fields.assignee.name]) {
+							weights[issue.fields.assignee.name] = {};
 							developers[issue.fields.assignee.name] = {};
 							_.each(dates, function (date) {
-								developers[issue.fields.assignee.name][date] = [];
+								weights[issue.fields.assignee.name][date] = 0;
+								developers[issue.fields.assignee.name][date] = {};
 							});
 						}
-						developers[issue.fields.assignee.name][date].push({
-							hours: 0,
-							issue: issue
-						});
+						
+						if (issue.fields.parent) {
+							if (!developers[issue.fields.assignee.name][date][issue.fields.parent.key]) {
+								weights[issue.fields.assignee.name][date] = 1;
+								developers[issue.fields.assignee.name][date][issue.fields.parent.key] = {
+									weight: 1,
+									hours: 0,
+									issue: issue.fields.parent,
+									subtasks: []
+								};
+							}
+							else {
+								weights[issue.fields.assignee.name][date] = weights[issue.fields.assignee.name][date] + 1;
+								developers[issue.fields.assignee.name][date][issue.fields.parent.key].weight = developers[issue.fields.assignee.name][date][issue.fields.parent.key].weight + 1;
+							}
+							developers[issue.fields.assignee.name][date][issue.fields.parent.key].subtasks.push(issue);
+						}
+						else {
+							weights[issue.fields.assignee.name][date] = weights[issue.fields.assignee.name][date] + 1;
+							developers[issue.fields.assignee.name][date][issue.key] = {
+								weight: 1,
+								hours: 0,
+								issue: issue,
+								subtasks: []
+							};
+						}
 					});
 					
 					completed++;
@@ -58,14 +83,14 @@ var Jira = module.exports = function () {
 						
 						// calculate hours
 						_.each(developers, function (developer, name) {
-							_.each(developer, function (logs) {
+							_.each(developer, function (logs, date) {
 								var totalHours = 0;
 								
 								_.each(logs, function (log, key) {
-									var hours = 8/logs.length;
+									var hours = 8*log.weight/weights[name][date];
 									var roundedHours = 0;
 									
-									if (key+1 == logs.length) {
+									if (key+1 == Object.keys(logs).length) {
 										roundedHours = 8 - totalHours;
 									}
 									else {
@@ -86,7 +111,7 @@ var Jira = module.exports = function () {
 							console.log(name);
 							_.each(developer, function (logs, date) {
 								console.log('- ' + date);
-								_.each(logs, function (log) {
+								_.each(logs, function (log, key) {
 									console.log('-- ' + log.issue.key + ' ' + log.issue.fields.summary + ': ' + log.hours + ' hours');
 								});
 							});
@@ -103,6 +128,7 @@ var Jira = module.exports = function () {
 									if (!developersTable[name][log.issue.key]) {
 										developersTable[name][log.issue.key] = {
 											issue: log.issue,
+											subtasks: log.subtasks,
 											dates: {}
 										};
 										_.each(dates, function (date) {
