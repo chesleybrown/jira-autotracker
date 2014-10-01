@@ -6,6 +6,9 @@
 	"engines": {
 		"node": "0.10.29"
 	},
+	"scripts": {
+		"start": "node server.js"
+	},
 	"repository": {
 		"type": "git",
 		"url": "git://github.com/chesleybrown/jira-autotracker.git"
