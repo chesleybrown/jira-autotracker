@@ -13,7 +13,7 @@ app.get('/', function (req, res) {
 	var format = 'YYYY/MM/DD';
 	
 	if (!date) {
-		date = moment().startOf('week').format('YYYY/MM/DD');
+		date = moment().startOf('week').format(format);
 	}
 	
 	var dates = [
