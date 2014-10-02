@@ -47,9 +47,12 @@ var Jira = module.exports = function () {
 							});
 						}
 						
+						if (!weights[issue.fields.assignee.name][date]) {
+							weights[issue.fields.assignee.name][date] = 0;
+						}
+						
 						if (issue.fields.parent) {
 							if (!developers[issue.fields.assignee.name][date][issue.fields.parent.key]) {
-								weights[issue.fields.assignee.name][date] = 1;
 								developers[issue.fields.assignee.name][date][issue.fields.parent.key] = {
 									weight: 1,
 									hours: 0,
@@ -58,19 +61,19 @@ var Jira = module.exports = function () {
 								};
 							}
 							else {
-								weights[issue.fields.assignee.name][date] = weights[issue.fields.assignee.name][date] + 1;
-								developers[issue.fields.assignee.name][date][issue.fields.parent.key].weight = developers[issue.fields.assignee.name][date][issue.fields.parent.key].weight + 1;
+								developers[issue.fields.assignee.name][date][issue.fields.parent.key].weight++;
 							}
 							developers[issue.fields.assignee.name][date][issue.fields.parent.key].subtasks.push(issue);
+							weights[issue.fields.assignee.name][date]++;
 						}
 						else {
-							weights[issue.fields.assignee.name][date] = weights[issue.fields.assignee.name][date] + 1;
 							developers[issue.fields.assignee.name][date][issue.key] = {
 								weight: 1,
 								hours: 0,
 								issue: issue,
 								subtasks: []
 							};
+							weights[issue.fields.assignee.name][date]++;
 						}
 					});
 					
@@ -84,14 +87,15 @@ var Jira = module.exports = function () {
 						// calculate hours
 						_.each(developers, function (developer, name) {
 							_.each(developer, function (logs, date) {
-								var totalHours = 0;
+								var totalDateHours = 0;
 								
 								_.each(logs, function (log, key) {
-									var hours = 8*log.weight/weights[name][date];
+									var hoursInDay = 8;
+									var hours = hoursInDay*log.weight/weights[name][date];
 									var roundedHours = 0;
 									
 									if (key+1 == Object.keys(logs).length) {
-										roundedHours = 8 - totalHours;
+										roundedHours = hoursInDay - totalDateHours;
 									}
 									else {
 										roundedHours = Math.round(hours*4)/4;
@@ -99,7 +103,7 @@ var Jira = module.exports = function () {
 									if (roundedHours <= 0) {
 										roundedHours = 0;
 									}
-									totalHours = totalHours + roundedHours;
+									totalDateHours = totalDateHours + roundedHours;
 									
 									log.hours = roundedHours;
 								});
