@@ -3,6 +3,13 @@ style.
 		margin: 0;
 		font: 16px "Helvetica Neue", Helvetica;
 	}
+	a {
+		text-decoration: none;
+		color: #3b73af;
+	}
+	a:hover {
+		text-decoration: underline;
+	}
 	nav {
 		border-bottom: 1px solid #2e3d54;
 		margin-top: 0;
@@ -60,12 +67,15 @@ table
 			th= name
 		each issue, issueKey in developer
 			tr
-				td #{issueKey} 
+				td 
+					a(href='https://' + host + '/browse/' + issueKey, target='_blank') #{issueKey} 
 					span.summary= issue.issue.fields.summary
 					if issue.subtasks.length
 						ul.subtasks
 							each subtask in issue.subtasks
-								li #{subtask.key} #{subtask.fields.summary}
+								li
+									a(href='https://' + host + '/browse/' + subtask.key, target='_blank') #{subtask.key} 
+									span #{subtask.fields.summary}
 				each hours in issue.dates
 					td
 						if hours

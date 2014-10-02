@@ -29,6 +29,7 @@ app.get('/', function (req, res) {
 		.get()
 		.then(function (developers) {
 			res.render('timesheet', {
+				host: process.env.JIRA_HOST,
 				previousWeek: moment(date, format).day(-7).format(format),
 				currentWeek: moment(date, format).day(1).format(format) + ' - ' + moment(date, format).day(5).format(format),
 				nextWeek: moment(date, format).day(7).format(format),
