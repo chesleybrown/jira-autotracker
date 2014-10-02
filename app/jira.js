@@ -54,16 +54,14 @@ var Jira = module.exports = function () {
 						if (issue.fields.parent) {
 							if (!developers[issue.fields.assignee.name][date][issue.fields.parent.key]) {
 								developers[issue.fields.assignee.name][date][issue.fields.parent.key] = {
-									weight: 1,
+									weight: 0,
 									hours: 0,
 									issue: issue.fields.parent,
 									subtasks: []
 								};
 							}
-							else {
-								developers[issue.fields.assignee.name][date][issue.fields.parent.key].weight++;
-							}
 							developers[issue.fields.assignee.name][date][issue.fields.parent.key].subtasks.push(issue);
+							developers[issue.fields.assignee.name][date][issue.fields.parent.key].weight++;
 							weights[issue.fields.assignee.name][date]++;
 						}
 						else {
@@ -88,21 +86,27 @@ var Jira = module.exports = function () {
 						_.each(developers, function (developer, name) {
 							_.each(developer, function (logs, date) {
 								var totalDateHours = 0;
+								var count = 0;
 								
 								_.each(logs, function (log, key) {
+									count++;
 									var hoursInDay = 8;
 									var hours = hoursInDay*log.weight/weights[name][date];
 									var roundedHours = 0;
 									
-									if (key+1 == Object.keys(logs).length) {
+									// when on last item, just use remaining hours available for that date
+									if (count == Object.keys(logs).length) {
 										roundedHours = hoursInDay - totalDateHours;
 									}
+									// round to the nearest quarter hour
 									else {
 										roundedHours = Math.round(hours*4)/4;
 									}
+									// never exceed hoursInDay
 									if (roundedHours <= 0) {
 										roundedHours = 0;
 									}
+									
 									totalDateHours = totalDateHours + roundedHours;
 									
 									log.hours = roundedHours;
