@@ -11,6 +11,14 @@ An automated Jira time tracker. It automatically determines hours worked on a ta
 2. Copy `.env.dist` to `.env`
 3. Set the enviroment variables in `.env` to what you need
 
+# Environment Variables
+- PORT=3000
+- JIRA_HOST=
+- JIRA_USERNAME=
+- JIRA_PASSWORD=
+- JIRA_FILTER=
+- JIRA_STATUSES="In Progress"
+
 # Running
 
 1. `grunt`
