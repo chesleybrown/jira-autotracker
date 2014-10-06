@@ -33,9 +33,33 @@ style.
 		vertical-align: top;
 		font-size: 12px;
 		border-bottom: 1px solid #999;
+		padding: 3px;
 	}
 	table td span.summary {
 		font-size: 10px;
+	}
+	table td span.type span {
+		border-width: 1px;
+		border-style: solid;
+		border-radius: 3px;
+		font-size: 10px;
+		padding: 0 3px;
+		margin-right: 5px;
+	}
+	table td span.type span.bug {
+		background-color: #f2dede;
+		border-color: #ebccd1;
+		color: #a94442;
+	}
+	table td span.type span.task {
+		background-color: #d9edf7;
+		border-color: #bce8f1;
+		color: #31708f;
+	}
+	table td span.type span.story {
+		background-color: #fcf8e3;
+		border-color: #faebcc;
+		color: #8a6d3b;
 	}
 	.controls {
 		margin-top: 10px;
@@ -68,6 +92,13 @@ table
 		each issue, issueKey in developer
 			tr
 				td 
+					span.type
+						if issue.issue.fields.issuetype.name == 'Bug'
+							span.bug Bug
+						else if issue.issue.fields.issuetype.name == 'Task'
+							span.task Task
+						else if issue.issue.fields.issuetype.name == 'Story'
+							span.story Story
 					a(href='https://' + host + '/browse/' + issueKey, target='_blank') #{issueKey} 
 					span.summary= issue.issue.fields.summary
 					if issue.subtasks.length
